@@ -152,9 +152,9 @@ function App() {
     setFileContent('')
     setResult(null)
     setError('')
-    // Keep password and dates for convenience? 
-    // User probably wants to upload for the SAME dates or NEXT day.
-    // Let's keep them as is.
+    setStartDate('')
+    setEndDate('')
+    // Only keeping password for convenience
   }
 
   const isFormValid = startDate && endDate && password && fileContent
