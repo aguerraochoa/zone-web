@@ -191,6 +191,13 @@ h4 {
   border-radius: var(--radius-md);
   color: var(--zone-black);
   transition: all 0.2s ease;
+  min-height: 50px;
+}
+
+input[type="date"].input-field {
+  line-height: normal;
+  display: flex;
+  align-items: center;
 }
 
 .input-field:focus {

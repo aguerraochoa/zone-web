@@ -181,6 +181,7 @@ function App() {
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
                   placeholder="Fecha inicio"
+                  style={{ WebkitAppearance: 'none', MozAppearance: 'none' }}
                 />
                 <input
                   type="date"
@@ -188,6 +189,7 @@ function App() {
                   value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}
                   placeholder="Fecha fin"
+                  style={{ WebkitAppearance: 'none', MozAppearance: 'none' }}
                 />
               </div>
             </div>
