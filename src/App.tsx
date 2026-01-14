@@ -24,6 +24,9 @@ function App() {
   const [isLoading, setIsLoading] = useState(false)
   const [result, setResult] = useState<ProcessResult | null>(null)
   const [error, setError] = useState('')
+  const [entryMode, setEntryMode] = useState<'upload' | 'manual'>('manual')
+
+  const [showConfirmation, setShowConfirmation] = useState(false)
 
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -62,13 +65,30 @@ function App() {
     }
   }
 
+  const handleModeChange = (mode: 'upload' | 'manual') => {
+    setEntryMode(mode)
+    setFileContent('')
+    setFile(null)
+    setError('')
+  }
+
   const formatDateForAPI = (dateStr: string): string => {
     // Convert from YYYY-MM-DD (input) to MM/DD/YYYY (API)
     const [year, month, day] = dateStr.split('-')
     return `${month}/${day}/${year}`
   }
 
-  const handleSubmit = async () => {
+  const formatDateForDisplay = (dateStr: string): string => {
+    if (!dateStr) return ''
+    const [year, month, day] = dateStr.split('-')
+    const months = [
+      'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+      'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
+    ]
+    return `${parseInt(day)} de ${months[parseInt(month) - 1]} de ${year}`
+  }
+
+  const handleSubmitRequest = () => {
     // Validation
     if (!startDate || !endDate) {
       setError('Por favor ingresa las fechas de inicio y fin')
@@ -84,6 +104,11 @@ function App() {
     }
 
     setError('')
+    setShowConfirmation(true)
+  }
+
+  const processAttendance = async () => {
+    setShowConfirmation(false)
     setResult(null)
     setIsLoading(true)
 
@@ -98,6 +123,7 @@ function App() {
           start_date: formatDateForAPI(startDate),
           end_date: formatDateForAPI(endDate),
           file_content: fileContent,
+          entry_mode: entryMode,
         }),
       })
 
@@ -206,40 +232,128 @@ function App() {
               />
             </div>
 
-            {/* File Upload Zone */}
+            {/* Data Entry Mode Selection */}
             <div className="form-group">
-              <label className="form-label">Archivo de Datos</label>
-              <div
-                className={`file-upload-zone ${isDragOver ? 'drag-over' : ''} ${file ? 'has-file' : ''}`}
-                onDrop={handleDrop}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onClick={() => fileInputRef.current?.click()}
-              >
-                <div className="upload-icon">📄</div>
-                <p className="upload-text">
-                  <strong>Arrastra tu archivo aquí</strong><br />
-                  o haz clic para seleccionar
-                </p>
-                {file && <p className="file-name">✓ {file.name}</p>}
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept=".txt,.csv"
-                  onChange={handleFileSelect}
-                  style={{ display: 'none' }}
-                />
+              <label className="form-label">Método de Entrada</label>
+              <div className="mode-toggle" style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+                <button
+                  className={`btn ${entryMode === 'manual' ? 'btn-primary' : 'btn-secondary'}`}
+                  onClick={() => handleModeChange('manual')}
+                  style={{ flex: 1, padding: '0.5rem' }}
+                >
+                  ✍️ Pegar Texto
+                </button>
+                <button
+                  className={`btn ${entryMode === 'upload' ? 'btn-primary' : 'btn-secondary'}`}
+                  onClick={() => handleModeChange('upload')}
+                  style={{ flex: 1, padding: '0.5rem' }}
+                >
+                  📁 Subir Archivo
+                </button>
               </div>
+
+              {entryMode === 'upload' ? (
+                /* File Upload Zone */
+                <div
+                  className={`file-upload-zone ${isDragOver ? 'drag-over' : ''} ${file ? 'has-file' : ''}`}
+                  onDrop={handleDrop}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <div className="upload-icon">📄</div>
+                  <p className="upload-text">
+                    <strong>Arrastra tu archivo aquí</strong><br />
+                    o haz clic para seleccionar
+                  </p>
+                  {file && <p className="file-name">✓ {file.name}</p>}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".txt,.csv"
+                    onChange={handleFileSelect}
+                    style={{ display: 'none' }}
+                  />
+                </div>
+              ) : (
+                /* Manual Text Area */
+                <div className="manual-input-zone">
+                  <textarea
+                    className="input-field"
+                    value={fileContent}
+                    onChange={(e) => setFileContent(e.target.value)}
+                    placeholder="Pega aquí los datos de asistencia..."
+                    style={{
+                      minHeight: '150px',
+                      fontFamily: 'monospace',
+                      resize: 'none',
+                      overflowY: 'auto'
+                    }}
+                  />
+                </div>
+              )}
             </div>
 
             {/* Submit Button */}
             <button
               className="btn btn-primary"
-              onClick={handleSubmit}
+              onClick={handleSubmitRequest}
               disabled={!isFormValid}
             >
               Procesar Asistencia
             </button>
+
+            {/* Confirmation Overlay */}
+            {showConfirmation && (
+              <div className="confirmation-overlay" style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: '#FFFFFF',
+                zIndex: 10,
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'center',
+                padding: 'var(--space-2xl)',
+                textAlign: 'center',
+                borderRadius: 'var(--radius-xl)'
+              }}>
+                <h3 style={{ marginBottom: '1.5rem', fontSize: '1.5rem' }}>¿Estás seguro que quieres procesar esta información?</h3>
+                <div style={{
+                  background: 'var(--zone-light-gray)',
+                  padding: '1.5rem',
+                  borderRadius: 'var(--radius-md)',
+                  marginBottom: '2.5rem',
+                  fontSize: '1rem',
+                  color: 'var(--zone-gray-2)',
+                  width: '100%'
+                }}>
+                  Se cargarán los datos para el rango:<br />
+                  <strong style={{ color: 'var(--zone-black)', fontSize: '1.2rem', display: 'block', marginTop: '0.5rem' }}>
+                    {formatDateForDisplay(startDate)} - {formatDateForDisplay(endDate)}
+                  </strong>
+                </div>
+                <div style={{ display: 'flex', gap: '1rem', width: '100%' }}>
+                  <button
+                    className="btn btn-secondary"
+                    onClick={() => setShowConfirmation(false)}
+                    style={{ flex: 1 }}
+                  >
+                    Regresar
+                  </button>
+                  <button
+                    className="btn btn-primary"
+                    onClick={processAttendance}
+                    style={{ flex: 1 }}
+                  >
+                    Sí, Procesar
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* Error Message */}
             {error && <div className="error-message">{error}</div>}

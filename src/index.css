@@ -63,6 +63,8 @@ html {
   font-size: 16px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+  height: 100%;
 }
 
 body {
@@ -70,7 +72,9 @@ body {
   background-color: var(--color-background);
   color: var(--color-text);
   line-height: 1.6;
-  min-height: 100vh;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
 }
 
 #root {
@@ -110,12 +114,14 @@ h4 {
 
 /* App Layout */
 .app-container {
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   padding: var(--space-xl);
   background: linear-gradient(180deg, var(--zone-light-gray) 0%, var(--zone-white) 100%);
+  overflow: hidden;
 }
 
 /* Header */
@@ -123,8 +129,8 @@ h4 {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-md);
-  margin-bottom: var(--space-2xl);
+  gap: var(--space-sm);
+  margin-bottom: var(--space-lg);
 }
 
 .logo {
@@ -144,11 +150,12 @@ h4 {
 .upload-card {
   background: var(--color-surface);
   border-radius: var(--radius-xl);
-  padding: var(--space-2xl);
+  padding: var(--space-xl);
   width: 100%;
   max-width: 600px;
   box-shadow: var(--shadow-xl);
   border: 1px solid var(--zone-gray-4);
+  position: relative;
 }
 
 /* Form Groups */
@@ -304,16 +311,38 @@ h4 {
 
 /* Results Section */
 .results-section {
-  margin-top: var(--space-xl);
-  padding-top: var(--space-xl);
+  margin-top: var(--space-sm);
+  padding-top: var(--space-sm);
   border-top: 1px solid var(--zone-gray-4);
+  max-height: 80vh;
+  overflow-y: auto;
+  padding-right: 5px;
+}
+
+/* Custom Scrollbar for Results */
+.results-section::-webkit-scrollbar {
+  width: 6px;
+}
+
+.results-section::-webkit-scrollbar-track {
+  background: var(--zone-light-gray);
+  border-radius: 10px;
+}
+
+.results-section::-webkit-scrollbar-thumb {
+  background: var(--zone-gray-4);
+  border-radius: 10px;
+}
+
+.results-section::-webkit-scrollbar-thumb:hover {
+  background: var(--zone-gray-3);
 }
 
 .result-card {
   background: var(--zone-light-gray);
   border-radius: var(--radius-md);
-  padding: var(--space-lg);
-  margin-bottom: var(--space-md);
+  padding: var(--space-md);
+  margin-bottom: var(--space-sm);
 }
 
 .result-card.success {
@@ -332,15 +361,15 @@ h4 {
 }
 
 .result-title {
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  margin-bottom: var(--space-xs);
+  margin-bottom: 2px;
 }
 
 .result-value {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 700;
 }
 
