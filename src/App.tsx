@@ -11,6 +11,7 @@ interface ProcessResult {
   matched_count?: number
   unmatched_count?: number
   bigquery_loaded?: boolean
+  bigquery_misc_loaded?: boolean
   misc_records?: Record<string, unknown>[]
 }
 
@@ -143,35 +144,6 @@ function App() {
     }
   }
 
-  const downloadMiscCSV = () => {
-    if (!result?.misc_records?.length) return
-
-    // Build CSV content
-    const headers = Object.keys(result.misc_records[0])
-    const csvRows = [
-      headers.join(','),
-      ...result.misc_records.map(record =>
-        headers.map(header => {
-          const value = record[header]
-          // Escape commas and quotes
-          const str = String(value ?? '')
-          return str.includes(',') || str.includes('"')
-            ? `"${str.replace(/"/g, '""')}"`
-            : str
-        }).join(',')
-      )
-    ]
-    const csvContent = csvRows.join('\n')
-
-    // Download
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `misc_records_${new Date().toISOString().split('T')[0]}.csv`
-    link.click()
-    URL.revokeObjectURL(url)
-  }
 
   const resetForm = () => {
     setFile(null)
@@ -390,15 +362,10 @@ function App() {
                 <div className="result-title">Registros No Procesados (Misc)</div>
                 <div className="result-value">{result.unmatched_count}</div>
                 <div className="result-subtitle">
-                  Clases no reconocidas o con baja asistencia
+                  {result.bigquery_misc_loaded
+                    ? '✓ Cargados a BigQuery (MISC)'
+                    : '⚠ Clases no reconocidas - Ver en Looker Studio'}
                 </div>
-                <button
-                  className="btn btn-secondary"
-                  onClick={downloadMiscCSV}
-                  style={{ marginTop: '1rem' }}
-                >
-                  📥 Descargar CSV
-                </button>
               </div>
             )}
 
