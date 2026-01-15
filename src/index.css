@@ -196,8 +196,6 @@ h4 {
 
 input[type="date"].input-field {
   line-height: normal;
-  display: flex;
-  align-items: center;
 }
 
 .input-field:focus {
